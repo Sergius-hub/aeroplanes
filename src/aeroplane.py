@@ -1,4 +1,10 @@
+from src.adapter_api import AdapterAPI
+
+class Aeroplane(AdapterAPI):
+    def __init__(self, country):
+        super().__init__(country)
 
 
-class Aeroplane:
-    pass
+
+aeroplane = Aeroplane("Canada")
+
