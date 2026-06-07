@@ -6,19 +6,30 @@ from requests import get, Response, RequestException, HTTPError
 class BaseAdapter(ABC):
 
     @abstractmethod
-    def get_response(self):
+    def get_response(self) -> Response:
         pass
 
 
 class Adapter(BaseAdapter):
     def __init__(self, request):
         self.request = request
+        self._response: Response | None = None
 
     def get_response(self) -> Response:
         return get(**self.request)
 
-    def _handle_status(self, response: Response) -> Response:
-        pass
+    @property
+    def response(self) -> Response:
+        """ Геттер, если _response пустой направить запрос и записать в _response, вернуть полученный _response """
+        if self._response is None:
+            self._response = self.get_response()
+
+        assert self._response is not None
+        return self._response
+
+
+    # def _handle_status(self, response: Response) -> Response:
+    #     pass
 
 class AdapterNominatimAPI(Adapter):
 
@@ -32,9 +43,6 @@ class AdapterNominatimAPI(Adapter):
         )
 
     def boundingbox(self):
-
-        self.response = self.get_response()
-
         return self.response
 
 class AdapterOpenskyAPI(Adapter):
