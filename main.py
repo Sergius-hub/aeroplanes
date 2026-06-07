@@ -40,8 +40,9 @@ def user_interface():
     bbox = api_nominatim.boundingbox()
     api_opensky = AdapterOpenskyAPI( bbox )
     raw_data = api_opensky.response.json()
-    aeroplanes = Aeroplane.read_from_raw(raw_data)
-    print_aeroplanes(aeroplanes)
+    print(type(raw_data))
+    # aeroplanes = Aeroplane.read_from_raw(raw_data)
+    # print_aeroplanes(aeroplanes)
 
     # sorted_aeroplanes = sort_aeroplanes(aeroplanes)
     # print_aeroplanes( sorted_aeroplanes )
@@ -54,8 +55,8 @@ def user_interface():
     #
     # print_aeroplanes(filter_aeroplanes( aeroplanes, country ))
 
-    json_file = JSONFileAdapter()
-    json_file.save( *aeroplanes )
+    # json_file = JSONFileAdapter()
+    # json_file.save( *aeroplanes )
 
     # data = json_file.load()
     # print(data)

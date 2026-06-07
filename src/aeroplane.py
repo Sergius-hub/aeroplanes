@@ -1,15 +1,67 @@
-# from src.file_adapter import JSONFileAdapter
-
-
 class Aeroplane:
+
     def __init__(self, callsign: str, country: str, velocity: float, altitude: float):
+        """Конструктор"""
         self.callsign = callsign
         self.country = country
         self.velocity = velocity
         self.altitude = altitude
 
+    # Геттеры и сеттеры
+    @property
+    def callsign(self) -> str:
+        return self._callsign
+
+    @callsign.setter
+    def callsign(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise TypeError("Callsign должен быть строкой")
+        self._callsign = value
+
+    @property
+    def country(self) -> str:
+        return self._country
+
+    @country.setter
+    def country(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise TypeError("Country должен быть строкой")
+        self._country = value
+
+    @property
+    def velocity(self) -> float:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: float) -> None:
+        """Сеттер velocity с валидацией"""
+        if not isinstance(value, (float, int)):
+            print("Velocity должен быть числом")
+            value = 0.0
+        if value < 0:
+            print("Velocity не может быть отрицательным")
+            value = 0.0
+        self._velocity = value
+
+    @property
+    def altitude(self) -> float:
+        return self._altitude
+
+    @altitude.setter
+    def altitude(self, value: float) -> None:
+        """Сеттер altitude с валидацией"""
+        if not isinstance(value, (float, int)):
+            print("Altitude должно быть числом")
+            value = 0.0
+        if not 0 <= value <= 30000:
+            print("Altitude должна быть в диапазоне от 0 до 30000")
+
+        self._altitude = value
+
+
     @classmethod
-    def read_from_raw(cls, raw_data):
+    def read_from_raw(cls, raw_data: dict) -> list:
+        """ Читает данные и приводит их к типу Aeroplane """
         return [
             cls(
                 callsign=state[1].strip() if state[1] else "n/a",
@@ -20,74 +72,35 @@ class Aeroplane:
             for state in raw_data["states"]
         ]
 
-    @property
-    def callsign(self):
-        return self._callsign
-
-    @property
-    def country(self):
-        return self._country
-
-    @property
-    def velocity(self):
-        return self._velocity
-
-    @property
-    def altitude(self):
-        return self._altitude
-
-    @callsign.setter
-    def callsign(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Callsign должен быть строкой")
-        self._callsign = value
-
-    @country.setter
-    def country(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Country должен быть строкой")
-        self._country = value
-
-    @velocity.setter
-    def velocity(self, value):
-        """ Сеттер velocity с валидацией """
-        if not isinstance(value, (float, int)):
-            print("Velocity должен быть числом")
-            value = 0.0
-        if value < 0:
-            print( "Velocity не может быть отрицательным" )
-            value = 0.0
-        self._velocity = value
-
-    @altitude.setter
-    def altitude(self, value):
-        """ Сеттер altitude с валидацией """
-        if not isinstance(value, (float, int)):
-            print("Altitude должно быть числом")
-            value = 0.0
-        if not 0 <= value <= 30000:
-            print( "Altitude должна быть в диапазоне от 0 до 30000" )
-
-        self._altitude = value
-
-    def __lt__(self, other):
+    def __lt__(self, other: Aeroplane) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
         return self.altitude < other.altitude
 
-    def __gt__(self, other):
+    def __gt__(self, other: Aeroplane) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
         return self.altitude > other.altitude
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
         return self.altitude == other.altitude
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """ Возвращает словарь """
         return {
             "callsign": self.callsign,
             "country": self.country,
             "velocity": self.velocity,
-            "altitude": self.altitude
+            "altitude": self.altitude,
         }
 
-    def __str__(self):
-        return f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
-
-
+    def __str__(self) -> str:
+        """ Вывод строки """
+        return (
+            f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
+        )
