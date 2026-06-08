@@ -146,12 +146,36 @@ class TestAeroplaneReadFromRaw:
         raw_data = {
             "states": [
                 [
-                    1, "ABC123", "USA", None, None, None, None, None, None,
-                    500.0, None, None, None, 10000.0
+                    1,
+                    "ABC123",
+                    "USA",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    500.0,
+                    None,
+                    None,
+                    None,
+                    10000.0,
                 ],
                 [
-                    2, "XYZ789", "Russia", None, None, None, None, None, None,
-                    600.0, None, None, None, 20000.0
+                    2,
+                    "XYZ789",
+                    "Russia",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    600.0,
+                    None,
+                    None,
+                    None,
+                    20000.0,
                 ],
             ]
         }
@@ -178,7 +202,22 @@ class TestAeroplaneReadFromRaw:
         """Тест: отсутствует callsign -> значение 'n/a'"""
         raw_data = {
             "states": [
-                [1, None, "USA", None, None, None, None, None, None, 500.0, None, None, None, 10000.0]
+                [
+                    1,
+                    None,
+                    "USA",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    500.0,
+                    None,
+                    None,
+                    None,
+                    10000.0,
+                ]
             ]
         }
         planes = Aeroplane.read_from_raw(raw_data)
@@ -188,7 +227,22 @@ class TestAeroplaneReadFromRaw:
         """Тест: отсутствует velocity -> 0.0"""
         raw_data = {
             "states": [
-                [1, "ABC123", "USA", None, None, None, None, None, None, None, None, None, None, 10000.0]
+                [
+                    1,
+                    "ABC123",
+                    "USA",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    10000.0,
+                ]
             ]
         }
         planes = Aeroplane.read_from_raw(raw_data)
@@ -198,7 +252,22 @@ class TestAeroplaneReadFromRaw:
         """Тест: отсутствует altitude -> 0.0"""
         raw_data = {
             "states": [
-                [1, "ABC123", "USA", None, None, None, None, None, None, 500.0, None, None, None, None]
+                [
+                    1,
+                    "ABC123",
+                    "USA",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    500.0,
+                    None,
+                    None,
+                    None,
+                    None,
+                ]
             ]
         }
         planes = Aeroplane.read_from_raw(raw_data)

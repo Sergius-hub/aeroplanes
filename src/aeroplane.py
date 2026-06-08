@@ -58,10 +58,9 @@ class Aeroplane:
 
         self._altitude = value
 
-
     @classmethod
     def read_from_raw(cls, raw_data: dict) -> list:
-        """ Читает данные и приводит их к типу Aeroplane """
+        """Читает данные и приводит их к типу Aeroplane"""
         return [
             cls(
                 callsign=state[1].strip() if state[1] else "n/a",
@@ -91,7 +90,7 @@ class Aeroplane:
         return self.altitude == other.altitude
 
     def to_dict(self) -> dict:
-        """ Возвращает словарь """
+        """Возвращает словарь"""
         return {
             "callsign": self.callsign,
             "country": self.country,
@@ -100,7 +99,7 @@ class Aeroplane:
         }
 
     def __str__(self) -> str:
-        """ Вывод строки """
+        """Вывод строки"""
         return (
             f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
         )
