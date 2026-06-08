@@ -22,7 +22,7 @@ class JSONFileAdapter(BaseFileAdapter):
         self.filename = filename
 
     def save(self, *args):
-
+        """Сохраняет информацию в файл"""
         if not args:
             raise ValueError("Нет объектов для сохранения")
 
@@ -35,6 +35,7 @@ class JSONFileAdapter(BaseFileAdapter):
             json.dump(data, file, ensure_ascii=False, indent=4)
 
     def load(self):
+        """Загружает информацию из файла"""
         with open(self.filename, "r", encoding="utf-8") as file:
             return json.load(file)
 

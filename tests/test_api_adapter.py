@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from src.api_adapter import HTTPAdapter, Response
 
 
