@@ -103,3 +103,5 @@ class Aeroplane:
         return (
             f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
         )
+
+
