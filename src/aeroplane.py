@@ -1,3 +1,5 @@
+from typing import Self
+
 class Aeroplane:
 
     def __init__(self, callsign: str, country: str, velocity: float, altitude: float):
@@ -71,13 +73,13 @@ class Aeroplane:
             for state in raw_data["states"]
         ]
 
-    def __lt__(self, other: Aeroplane) -> bool:
+    def __lt__(self, other: Self) -> bool:
         """Сравнение самолетов по высоте"""
         if not isinstance(other, Aeroplane):
             return NotImplemented
         return self.altitude < other.altitude
 
-    def __gt__(self, other: Aeroplane) -> bool:
+    def __gt__(self, other: Self) -> bool:
         """Сравнение самолетов по высоте"""
         if not isinstance(other, Aeroplane):
             return NotImplemented
