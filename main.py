@@ -56,8 +56,8 @@ def user_interface():
     #
     # print_aeroplanes(filter_aeroplanes( aeroplanes, country ))
 
-    # json_file = JSONFileAdapter()
-    # json_file.save( *aeroplanes )
+    json_file = JSONFileAdapter(f"{country}_aeroplanes.json")
+    json_file.save( *aeroplanes )
 
     # data = json_file.load()
     # print(data)

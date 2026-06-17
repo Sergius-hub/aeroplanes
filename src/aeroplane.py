@@ -53,10 +53,10 @@ class Aeroplane:
     def altitude(self, value: float) -> None:
         """Сеттер altitude с валидацией"""
         if not isinstance(value, (float, int)):
-            print("Altitude должно быть числом")
+            print("Неправильный тип данных в 'Altitude', ожидается число")
             value = 0.0
         if not 0 <= value <= 30000:
-            print("Altitude должна быть в диапазоне от 0 до 30000")
+            print(f"Неправильное значение 'Altitude' = {value}, у самолета '{self.callsign}' диапазон от 0 до 30000")
 
         self._altitude = value
 

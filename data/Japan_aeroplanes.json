@@ -1,0 +1,74 @@
+[
+    {
+        "callsign": "ANA8404",
+        "country": "Japan",
+        "velocity": 277.35,
+        "altitude": 11330.94
+    },
+    {
+        "callsign": "ANA838",
+        "country": "Japan",
+        "velocity": 285.57,
+        "altitude": 13152.12
+    },
+    {
+        "callsign": "SJO445",
+        "country": "Japan",
+        "velocity": 0.0,
+        "altitude": 0.0
+    },
+    {
+        "callsign": "JAL42",
+        "country": "Japan",
+        "velocity": 290.02,
+        "altitude": 13037.82
+    },
+    {
+        "callsign": "APJ877",
+        "country": "Japan",
+        "velocity": 215.32,
+        "altitude": 11666.22
+    },
+    {
+        "callsign": "ANA880",
+        "country": "Japan",
+        "velocity": 238.95,
+        "altitude": 8679.18
+    },
+    {
+        "callsign": "ANA814",
+        "country": "Japan",
+        "velocity": 2.57,
+        "altitude": 0.0
+    },
+    {
+        "callsign": "UNJYO3",
+        "country": "Japan",
+        "velocity": 9.26,
+        "altitude": 0.0
+    },
+    {
+        "callsign": "APJ876",
+        "country": "Japan",
+        "velocity": 6.43,
+        "altitude": 0.0
+    },
+    {
+        "callsign": "TEST",
+        "country": "Japan",
+        "velocity": 8.23,
+        "altitude": 0.0
+    },
+    {
+        "callsign": "JJP36",
+        "country": "Japan",
+        "velocity": 252.67,
+        "altitude": 10645.14
+    },
+    {
+        "callsign": "JAL30",
+        "country": "Japan",
+        "velocity": 269.27,
+        "altitude": 13213.08
+    }
+]

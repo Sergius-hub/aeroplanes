@@ -18,8 +18,8 @@ class BaseFileAdapter(ABC):
 
 
 class JSONFileAdapter(BaseFileAdapter):
-    def __init__(self, filename: str = "data/aeroplanes.json"):
-        self.filename = filename
+    def __init__(self, filename: str = "aeroplanes.json"):
+        self.filename = f"data/{filename}"
 
     def save(self, *args):
         """Сохраняет информацию в файл"""
