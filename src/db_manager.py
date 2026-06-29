@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-
+from config import config
+from psycopg2 import connect, sql
 
 class BaseDBConnector(ABC):
 
@@ -7,17 +8,64 @@ class BaseDBConnector(ABC):
     def connect( self ):
         pass
 
+    @abstractmethod
+    def disconnect( self ):
+        pass
+
+    @abstractmethod
+    def __enter__( self ):
+        pass
+
+    @abstractmethod
+    def __exit__( self, exc_type, exc_val, exc_tb ):
+        pass
+
 
 class DBConnector(BaseDBConnector):
-    pass
+
+    def __init__( self ):
+        self._connection = None
+
+    def connect(self):
+        """Устанавливаем соединение с базой данных"""
+        if self._connection is None or self._connection.closed:
+            params = config()
+            self._connection = connect(dbname="postgres", **params)
+            self._connection.autocommit = True
+
+        return self._connection
+
+    def disconnect(self):
+        """Закрываем соединение с базой данных"""
+        if self._connection is not None and not self._connection.closed:
+            self._connection.close()
+            self._connection = None
+
+    def __enter__(self):
+        """Контекстный менеджер при входе"""
+        return self.connect()
+
+    def __exit__( self, exc_type, exc_val, exc_tb ):
+        """Контекстный менеджер при выходе"""
+        self.disconnect()
 
 
-class BaseDBManager(ABC):
-    pass
+class DBCreator:
+    def __init__( self, connector: BaseDBConnector ):
+        self._connector = connector
+
+    def create_database(self, database_name: str):
+        with self._connector as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(database_name)))
+                cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database_name)))
+                
 
 
+class DBManager:
 
-class DBManager(BaseDBManager):
+    def __init__( self, connector: DBConnector ):
+        self._connector = connector
 
     def get_countries_and_aeroplanes_count( self ):
         """Получает список всех стран и количество самолетов в их воздушных пространствах"""

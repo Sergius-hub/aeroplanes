@@ -3,6 +3,7 @@ from src.aeroplane import Aeroplane
 from src.file_adapter import JSONFileAdapter
 import json
 
+
 def filter_aeroplanes( aeroplanes, filter_words ):
     """ Фильтрует список самолетов по странам """
     print("Фильтрация по странам:")
@@ -63,7 +64,10 @@ def user_interface():
     # print(data)
     # print(type(data))
 
+def db_connect():
+    pass
+
 if __name__ == "__main__":
 
-    user_interface()
-
+    # user_interface()
+    db_connect()
