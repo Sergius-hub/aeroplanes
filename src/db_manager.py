@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from config import config
+from src.config import config
 from psycopg2 import connect, sql
 
 class BaseDBConnector(ABC):
@@ -23,16 +23,21 @@ class BaseDBConnector(ABC):
 
 class DBConnector(BaseDBConnector):
 
-    def __init__( self ):
+    def __init__( self, dbname: str ):
+        self.dbname = dbname
         self._connection = None
 
     def connect(self):
         """Устанавливаем соединение с базой данных"""
         if self._connection is None or self._connection.closed:
             params = config()
-            self._connection = connect(dbname="postgres", **params)
+            self._connection = connect(dbname=self.dbname, **params)
             self._connection.autocommit = True
 
+        if self._connection is None:
+            print("Ошибка соединения с базой данных")
+
+        print("Соединение с базой данных установлено")
         return self._connection
 
     def disconnect(self):
@@ -40,6 +45,7 @@ class DBConnector(BaseDBConnector):
         if self._connection is not None and not self._connection.closed:
             self._connection.close()
             self._connection = None
+            print("Соединение с базой данных закрыто")
 
     def __enter__(self):
         """Контекстный менеджер при входе"""
@@ -59,7 +65,13 @@ class DBCreator:
             with conn.cursor() as cursor:
                 cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(database_name)))
                 cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database_name)))
-                
+                print("База данных создана")
+
+
+    # def create_tables( self, table_name: str ):
+    #     with self._connector as conn:
+    #         pass
+
 
 
 class DBManager:
