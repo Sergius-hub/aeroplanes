@@ -43,7 +43,7 @@ class DBConnector(BaseDBConnector):
         return self._connection
 
     def cursor( self ):
-        return self._connection.cursor()
+        return self.connection.cursor()
 
     def connect(self):
         """Устанавливаем соединение с базой данных"""
@@ -68,22 +68,53 @@ class DBConnector(BaseDBConnector):
 
 
 class DBCreator:
-    """Класс работает с созданием базы данных и таблиц внутри нее"""
-    def __init__(self, connector: BaseDBConnector):
+    """Класс создает базы данных по имени в коннекторе"""
+    def __init__(self, connector: BaseDBConnector, database_name: str):
         self._connector = connector
+        self._database_name = database_name
 
     def create_database(self):
-
+        """Функция создает базу данных"""
         conn = self._connector.connect()
         conn.connection.autocommit = True
 
         with conn.cursor() as cursor:
-            cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(self._connector.dbname)))
-            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(self._connector.dbname)))
+            cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(self._database_name)))
+            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(self._database_name)))
             print("База данных создана")
 
         conn.disconnect()
 
+
+class TBCreator:
+    """Класс в базе данных создает таблицы"""
+    def __init__(self, connector: BaseDBConnector):
+        self._connector = connector
+
+    def create_tables( self ):
+        with self._connector as conn:
+            with conn.cursor() as cursor:
+                cursor.execute( """
+                    CREATE TABLE IF NOT EXISTS countries (
+                        country_id SERIAL PRIMARY KEY,
+                        name VARCHAR(20) NOT NULL,
+                        CONSTRAINT uq_countries_name UNIQUE (name)                        
+                    )
+                    """ )
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS aeroplanes (
+                        aeroplane_id SERIAL PRIMARY KEY,
+                        country_id INTEGER NOT NULL,
+                        callsign VARCHAR(10) NOT NULL,
+                        velocity REAL,
+                        altitude REAL,
+                        CONSTRAINT fk_aeroplanes_country FOREIGN KEY (country_id) REFERENCES countries (country_id) ON DELETE RESTRICT,
+                        CONSTRAINT uq_aeroplanes_callsign UNIQUE (callsign)                        
+                    )
+                    """)
+                print("Таблицы созданы")
+
+            conn.connection.commit()
 
 
 class DBManager:

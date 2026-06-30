@@ -1,4 +1,4 @@
-from db_manager import DBConnector
+from db_manager import DBConnector, TBCreator
 from src.api_adapters import AdapterNominatimAPI, AdapterOpenskyAPI
 from src.aeroplane import Aeroplane
 from src.file_adapter import JSONFileAdapter
@@ -66,15 +66,22 @@ def user_interface():
     # print(data)
     # print(type(data))
 
-def db_connect():
+def db_create():
+    db_name = "aeroplanes_db"
 
-    connector = DBConnector()
-    # connector.connect()
-    # connector.disconnect()
-    creator = DBCreator(connector)
-    creator.create_database("aeroplanes_db")
+    # Создаем базы данных
+    connector_postgres = DBConnector()
+
+    creator_db = DBCreator(connector_postgres, db_name)
+    creator_db.create_database()
+
+    # Создаем таблицы
+    connector_db = DBConnector( db_name )
+
+    creator_tb = TBCreator(connector_db)
+    creator_tb.create_tables()
 
 if __name__ == "__main__":
 
     # user_interface()
-    db_connect()
+    db_create()
