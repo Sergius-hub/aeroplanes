@@ -3,6 +3,14 @@ from src.config import config
 from psycopg2 import connect, sql
 
 class BaseDBConnector(ABC):
+    """Абстракция для DBConnector"""
+
+    def __init__( self, dbname: str="postgres" ):
+        self._dbname = dbname
+
+    @property
+    def dbname( self ):
+        return self._dbname
 
     @abstractmethod
     def connect( self ):
@@ -12,42 +20,7 @@ class BaseDBConnector(ABC):
     def disconnect( self ):
         pass
 
-    @abstractmethod
     def __enter__( self ):
-        pass
-
-    @abstractmethod
-    def __exit__( self, exc_type, exc_val, exc_tb ):
-        pass
-
-
-class DBConnector(BaseDBConnector):
-
-    def __init__( self, dbname: str ):
-        self.dbname = dbname
-        self._connection = None
-
-    def connect(self):
-        """Устанавливаем соединение с базой данных"""
-        if self._connection is None or self._connection.closed:
-            params = config()
-            self._connection = connect(dbname=self.dbname, **params)
-            self._connection.autocommit = True
-
-        if self._connection is None:
-            print("Ошибка соединения с базой данных")
-
-        print("Соединение с базой данных установлено")
-        return self._connection
-
-    def disconnect(self):
-        """Закрываем соединение с базой данных"""
-        if self._connection is not None and not self._connection.closed:
-            self._connection.close()
-            self._connection = None
-            print("Соединение с базой данных закрыто")
-
-    def __enter__(self):
         """Контекстный менеджер при входе"""
         return self.connect()
 
@@ -56,21 +29,60 @@ class DBConnector(BaseDBConnector):
         self.disconnect()
 
 
+class DBConnector(BaseDBConnector):
+    """Класс работает с подключеием и/или отключением к базе данных"""
+    def __init__(self, dbname: str="postgres", autocommit: bool=False):
+        super().__init__(dbname)
+        self._autocommit = autocommit
+        self._connection = None
+
+    @property
+    def connection( self ):
+        if self._connection is None:
+            raise ConnectionError( "Нет соединения. Вызовите connect()" )
+        return self._connection
+
+    def cursor( self ):
+        return self._connection.cursor()
+
+    def connect(self):
+        """Устанавливаем соединение с базой данных"""
+        if self._connection is None or self._connection.closed:
+            params = config()
+            self._connection = connect(dbname=self._dbname, **params)
+            self._connection.autocommit = self._autocommit
+
+        if self._connection is None:
+            print("Ошибка соединения с базой данных")
+
+        print("Соединение с базой данных установлено")
+        return self
+
+    def disconnect(self):
+        """Закрываем соединение с базой данных"""
+        if self._connection is not None and not self._connection.closed:
+            self._connection.close()
+            self._connection = None
+            print("Соединение с базой данных закрыто")
+
+
+
 class DBCreator:
-    def __init__( self, connector: BaseDBConnector ):
+    """Класс работает с созданием базы данных и таблиц внутри нее"""
+    def __init__(self, connector: BaseDBConnector):
         self._connector = connector
 
-    def create_database(self, database_name: str):
-        with self._connector as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(database_name)))
-                cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database_name)))
-                print("База данных создана")
+    def create_database(self):
 
+        conn = self._connector.connect()
+        conn.connection.autocommit = True
 
-    # def create_tables( self, table_name: str ):
-    #     with self._connector as conn:
-    #         pass
+        with conn.cursor() as cursor:
+            cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(self._connector.dbname)))
+            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(self._connector.dbname)))
+            print("База данных создана")
+
+        conn.disconnect()
 
 
 

@@ -68,7 +68,7 @@ def user_interface():
 
 def db_connect():
 
-    connector = DBConnector("postgres")
+    connector = DBConnector()
     # connector.connect()
     # connector.disconnect()
     creator = DBCreator(connector)
