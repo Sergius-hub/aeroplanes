@@ -10,13 +10,9 @@ def config(
     parser = ConfigParser()
 
     if not parser.read(filename):
-        raise FileNotFoundError(
-            f"Configuration file '{filename}' not found."
-        )
+        raise FileNotFoundError(f"Configuration file '{filename}' not found.")
 
     if not parser.has_section(section):
-        raise ValueError(
-            f"Section '{section}' not found in '{filename}'."
-        )
+        raise ValueError(f"Section '{section}' not found in '{filename}'.")
 
     return dict(parser.items(section))

@@ -1,15 +1,20 @@
+from aeroplane import Aeroplane
 from db_manager import DBConnector, TBCreator
 from src.api_adapters import AdapterNominatimAPI, AdapterOpenskyAPI
 from src.aeroplane import Aeroplane
 from src.file_adapter import JSONFileAdapter
-from src.db_manager import DBCreator, DBConnector
+from src.db_manager import DBCreator, DBConnector, DBManager
 import json
 
 
-def filter_aeroplanes( aeroplanes, filter_words ):
+def filter_aeroplanes_by_countries( aeroplanes, filter_words ):
     """ Фильтрует список самолетов по странам """
-    print("Фильтрация по странам:")
+    print(f"Фильтрация по странам {filter_words}:")
     return [ aeroplane for aeroplane in aeroplanes if aeroplane.country in filter_words ]
+
+def filter_aeroplanes_by_altitude_and_velocity( aeroplanes, altitude: float=0.0, velocity: float=0.0 ):
+    """ Фильтрует список самолетов по странам """
+    return [ aeroplane for aeroplane in aeroplanes if aeroplane.altitude <= altitude and aeroplane.velocity >= velocity ]
 
 def get_aeroplanes_by_altitude( aeroplanes, altitude_range ):
     """ Фильтрует список самолетов по диапазону высоты """
@@ -32,6 +37,18 @@ def print_aeroplanes( aeroplanes ):
     for aeroplane in aeroplanes:
         print( aeroplane )
 
+def get_aeroplanes_from_countries( countries: list ):
+    for country in countries:
+        api_nominatim = AdapterNominatimAPI( country )
+        bbox = api_nominatim.boundingbox()
+        api_opensky = AdapterOpenskyAPI( bbox )
+        raw_data = api_opensky.response.json()
+
+        aeroplanes = Aeroplane.read_from_raw( raw_data )
+        aeroplanes = filter_aeroplanes_by_countries( aeroplanes, country )
+        aeroplanes = filter_aeroplanes_by_altitude_and_velocity( aeroplanes, 30000.0, 10.0)
+        print_aeroplanes(aeroplanes)
+
 def user_interface():
     country = input( "Введите название страны: " )
     # top_n = int( input( "Введите количество самолетов для вывода в топ N: " ) )
@@ -45,7 +62,7 @@ def user_interface():
     raw_data = api_opensky.response.json()
 
     aeroplanes = Aeroplane.read_from_raw(raw_data)
-    aeroplanes = filter_aeroplanes( aeroplanes, country )
+    aeroplanes = filter_aeroplanes_by_countries( aeroplanes, country )
     print_aeroplanes(aeroplanes)
 
     # sorted_aeroplanes = sort_aeroplanes(aeroplanes)
@@ -67,21 +84,25 @@ def user_interface():
     # print(type(data))
 
 def db_create():
+
     db_name = "aeroplanes_db"
 
     # Создаем базы данных
     connector_postgres = DBConnector()
-
     creator_db = DBCreator(connector_postgres, db_name)
     creator_db.create_database()
 
     # Создаем таблицы
     connector_db = DBConnector( db_name )
-
     creator_tb = TBCreator(connector_db)
     creator_tb.create_tables()
+
+def save_db():
+    get_aeroplanes_from_countries(["Spain", "Italy", "Japan", "France"])
+    # db = DBManager()
 
 if __name__ == "__main__":
 
     # user_interface()
-    db_create()
+    # db_create()
+    save_db()

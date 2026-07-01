@@ -2,47 +2,49 @@ from abc import ABC, abstractmethod
 from src.config import config
 from psycopg2 import connect, sql
 
+
 class BaseDBConnector(ABC):
     """Абстракция для DBConnector"""
 
-    def __init__( self, dbname: str="postgres" ):
+    def __init__(self, dbname: str = "postgres"):
         self._dbname = dbname
 
-    @property
-    def dbname( self ):
-        return self._dbname
-
-    @abstractmethod
-    def connect( self ):
-        pass
-
-    @abstractmethod
-    def disconnect( self ):
-        pass
-
-    def __enter__( self ):
+    def __enter__(self):
         """Контекстный менеджер при входе"""
         return self.connect()
 
-    def __exit__( self, exc_type, exc_val, exc_tb ):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """Контекстный менеджер при выходе"""
         self.disconnect()
+
+    @abstractmethod
+    def connect(self):
+        pass
+
+    @abstractmethod
+    def disconnect(self):
+        pass
+
+    @property
+    def dbname(self):
+        return self._dbname
 
 
 class DBConnector(BaseDBConnector):
     """Класс работает с подключеием и/или отключением к базе данных"""
-    def __init__(self, dbname: str="postgres", autocommit: bool=False):
+
+    def __init__(self, dbname: str = "postgres", autocommit: bool = False):
         super().__init__(dbname)
         self._autocommit = autocommit
         self._connection = None
 
     @property
-    def connection( self ):
+    def connection(self):
         if self._connection is None:
-            raise ConnectionError( "Нет соединения. Вызовите connect()" )
+            raise ConnectionError("Нет соединения. Вызовите connect()")
         return self._connection
 
-    def cursor( self ):
+    def cursor(self):
         return self.connection.cursor()
 
     def connect(self):
@@ -66,41 +68,47 @@ class DBConnector(BaseDBConnector):
             print("Соединение с базой данных закрыто")
 
 
-
 class DBCreator:
     """Класс создает базы данных по имени в коннекторе"""
+
     def __init__(self, connector: BaseDBConnector, database_name: str):
         self._connector = connector
         self._database_name = database_name
 
     def create_database(self):
         """Функция создает базу данных"""
-        conn = self._connector.connect()
-        conn.connection.autocommit = True
-
-        with conn.cursor() as cursor:
-            cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}" ).format(sql.Identifier(self._database_name)))
-            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(self._database_name)))
-            print("База данных создана")
-
-        conn.disconnect()
+        with self._connector as conn:
+            conn.connection.autocommit = True
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    sql.SQL("DROP DATABASE IF EXISTS {}").format(
+                        sql.Identifier(self._database_name)
+                    )
+                )
+                cursor.execute(
+                    sql.SQL("CREATE DATABASE {}").format(
+                        sql.Identifier(self._database_name)
+                    )
+                )
+                print("База данных создана")
 
 
 class TBCreator:
     """Класс в базе данных создает таблицы"""
+
     def __init__(self, connector: BaseDBConnector):
         self._connector = connector
 
-    def create_tables( self ):
+    def create_tables(self):
         with self._connector as conn:
             with conn.cursor() as cursor:
-                cursor.execute( """
+                cursor.execute("""
                     CREATE TABLE IF NOT EXISTS countries (
                         country_id SERIAL PRIMARY KEY,
                         name VARCHAR(20) NOT NULL,
                         CONSTRAINT uq_countries_name UNIQUE (name)                        
                     )
-                    """ )
+                    """)
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS aeroplanes (
                         aeroplane_id SERIAL PRIMARY KEY,
@@ -117,27 +125,48 @@ class TBCreator:
             conn.connection.commit()
 
 
-class DBManager:
+class BaseDBManager(ABC):
 
-    def __init__( self, connector: DBConnector ):
+    @abstractmethod
+    def save_data_to_database(self, data: dict):
+        pass
+
+    @abstractmethod
+    def clear_data(self):
+        pass
+
+class DBManager(BaseDBManager):
+
+    def __init__(self, connector: BaseDBConnector):
         self._connector = connector
 
-    def get_countries_and_aeroplanes_count( self ):
+    def save_data_to_database(self, data: dict):
+        # with self._connector as conn:
+        #     with conn.cursor() as cursor:
+        #         cursor.execute("INSERT INTO countries VALUES ({})")
+
+        for aeroplane in data:
+            print(aeroplane)
+
+    def clear_data(self):
+        pass
+
+    def get_countries_and_aeroplanes_count(self):
         """Получает список всех стран и количество самолетов в их воздушных пространствах"""
         pass
 
-    def get_all_aeroplanes( self ):
+    def get_all_aeroplanes(self):
         """Получает список всех воздушных судов"""
         pass
 
-    def get_avg_speed( self ):
+    def get_avg_speed(self):
         """Получает среднюю скорость по самолетам"""
         pass
 
-    def get_aeroplanes_with_higher_speed( self ):
+    def get_aeroplanes_with_higher_speed(self):
         """Получает список всех самолетов, у которых скорость выше средней"""
         pass
 
-    def get_aeroplanes_with_keyword( self ):
+    def get_aeroplanes_with_keyword(self):
         """Получает список всех самолетов, в позывном которых содержатся переданные в метод символы"""
         pass
