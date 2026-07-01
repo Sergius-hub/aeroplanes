@@ -13,7 +13,7 @@ class Aeroplane:
     def __str__(self) -> str:
         """Вывод строки"""
         return (
-            f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
+            f"Самолет: {self.callsign} country: {self.country} volocity: {self.velocity} altitude: {self.altitude}"
         )
 
     def __lt__(self, other: Self) -> bool:
@@ -93,7 +93,7 @@ class Aeroplane:
         return [
             cls(
                 callsign=state[1].strip() if state[1] else "n/a",
-                country=state[2],
+                country=state[2].strip() if state[2] else "n/a",
                 velocity=state[9] or 0.0,
                 altitude=state[13] or 0.0,
             )

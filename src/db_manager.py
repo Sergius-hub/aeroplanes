@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from src.config import config
 from psycopg2 import connect, sql
-
+from typing import Any
 
 class BaseDBConnector(ABC):
     """Абстракция для DBConnector"""
@@ -116,8 +116,7 @@ class TBCreator:
                         callsign VARCHAR(10) NOT NULL,
                         velocity REAL,
                         altitude REAL,
-                        CONSTRAINT fk_aeroplanes_country FOREIGN KEY (country_id) REFERENCES countries (country_id) ON DELETE RESTRICT,
-                        CONSTRAINT uq_aeroplanes_callsign UNIQUE (callsign)                        
+                        CONSTRAINT fk_aeroplanes_country FOREIGN KEY (country_id) REFERENCES countries (country_id) ON DELETE RESTRICT                                              
                     )
                     """)
                 print("Таблицы созданы")
@@ -127,26 +126,61 @@ class TBCreator:
 
 class BaseDBManager(ABC):
 
+    def __init__(self, db_name: str = "aeroplanes_db"):
+        self.db_name = db_name
+
+
     @abstractmethod
-    def save_data_to_database(self, data: dict):
+    def save_data_to_database(self, data: list[dict[str, Any]]):
         pass
 
     @abstractmethod
     def clear_data(self):
         pass
 
+    def setup_db(self):
+        """Метод создает базу данных и таблицы"""
+        # Создаем базу данных
+        connector_postgres = DBConnector()
+        creator_db = DBCreator( connector_postgres, self.db_name )
+        creator_db.create_database()
+
+        # Создаем таблицы
+        connector_db = DBConnector( self.db_name )
+        creator_tb = TBCreator( connector_db )
+        creator_tb.create_tables()
+
+
 class DBManager(BaseDBManager):
+    """Класс, который может соединяться с базой данных, записывать в базу и получать информацию"""
 
-    def __init__(self, connector: BaseDBConnector):
-        self._connector = connector
+    def __init__(self, db_name: str = "aeroplanes_db"):
+        super().__init__(db_name)
 
-    def save_data_to_database(self, data: dict):
-        # with self._connector as conn:
-        #     with conn.cursor() as cursor:
-        #         cursor.execute("INSERT INTO countries VALUES ({})")
+    def save_data_to_database(self, data: list[dict[str, Any]]):
+        """Метод сохраняет информацию из словаря в базу данных"""
+        with DBConnector( self.db_name ) as conn:
+            with conn.cursor() as cursor:
+                for aeroplane in data:
+                    cursor.execute(
+                        """
+                        INSERT INTO countries (name) VALUES (%s)
+                        ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+                        RETURNING country_id
+                        """,
+                        (aeroplane["country"],)
+                    )
+                    country_id = cursor.fetchone()[0]
 
-        for aeroplane in data:
-            print(aeroplane)
+                    cursor.execute(
+                        """
+                        INSERT INTO aeroplanes (country_id, callsign, velocity, altitude)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (country_id, aeroplane["callsign"], aeroplane["velocity"], aeroplane["altitude"])
+                    )
+            conn.connection.commit()
+        print(f"Информация в базу данных {self.db_name} добавлена")
 
     def clear_data(self):
         pass

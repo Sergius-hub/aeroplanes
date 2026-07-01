@@ -37,7 +37,11 @@ def print_aeroplanes( aeroplanes ):
     for aeroplane in aeroplanes:
         print( aeroplane )
 
-def get_aeroplanes_from_countries( countries: list ):
+def covert_aeroplanes_to_dict(aeroplanes: list) -> list:
+    return [ aeroplane.to_dict() for aeroplane in aeroplanes]
+
+def get_aeroplanes_from_countries( countries: list ) -> list:
+    aeroplanes_list = []
     for country in countries:
         api_nominatim = AdapterNominatimAPI( country )
         bbox = api_nominatim.boundingbox()
@@ -47,7 +51,10 @@ def get_aeroplanes_from_countries( countries: list ):
         aeroplanes = Aeroplane.read_from_raw( raw_data )
         aeroplanes = filter_aeroplanes_by_countries( aeroplanes, country )
         aeroplanes = filter_aeroplanes_by_altitude_and_velocity( aeroplanes, 30000.0, 10.0)
+        aeroplanes_list.extend(aeroplanes)
         print_aeroplanes(aeroplanes)
+
+    return aeroplanes_list
 
 def user_interface():
     country = input( "Введите название страны: " )
@@ -83,26 +90,17 @@ def user_interface():
     # print(data)
     # print(type(data))
 
-def db_create():
+def save_data_to_db():
+    aeroplanes = get_aeroplanes_from_countries(["Spain", "Italy", "Japan", "France"])
+    aeroplanes_dicts = covert_aeroplanes_to_dict(aeroplanes)
 
-    db_name = "aeroplanes_db"
+    for aeroplane in aeroplanes_dicts:
+        print( aeroplane )
 
-    # Создаем базы данных
-    connector_postgres = DBConnector()
-    creator_db = DBCreator(connector_postgres, db_name)
-    creator_db.create_database()
-
-    # Создаем таблицы
-    connector_db = DBConnector( db_name )
-    creator_tb = TBCreator(connector_db)
-    creator_tb.create_tables()
-
-def save_db():
-    get_aeroplanes_from_countries(["Spain", "Italy", "Japan", "France"])
-    # db = DBManager()
+    db_manager = DBManager( "aeroplanes_db" )
+    db_manager.setup_db()
+    db_manager.save_data_to_database( aeroplanes_dicts )
 
 if __name__ == "__main__":
 
-    # user_interface()
-    # db_create()
-    save_db()
+    save_data_to_db()
