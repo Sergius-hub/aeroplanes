@@ -12,9 +12,7 @@ class Aeroplane:
 
     def __str__(self) -> str:
         """Вывод строки"""
-        return (
-            f"Самолет: {self.callsign} country: {self.country} volocity: {self.velocity} altitude: {self.altitude}"
-        )
+        return f"Самолет: {self.callsign} country: {self.country} volocity: {self.velocity} altitude: {self.altitude}"
 
     def __lt__(self, other: Self) -> bool:
         """Сравнение самолетов по высоте"""
@@ -108,5 +106,3 @@ class Aeroplane:
             "velocity": self.velocity,
             "altitude": self.altitude,
         }
-
-

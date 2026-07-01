@@ -1,10 +1,7 @@
-from aeroplane import Aeroplane
-from db_manager import DBConnector, TBCreator
 from src.api_adapters import AdapterNominatimAPI, AdapterOpenskyAPI
 from src.aeroplane import Aeroplane
 from src.file_adapter import JSONFileAdapter
-from src.db_manager import DBCreator, DBConnector, DBManager
-import json
+from src.db_manager import DBManager
 
 
 def filter_aeroplanes_by_countries( aeroplanes, filter_words ):
@@ -38,9 +35,11 @@ def print_aeroplanes( aeroplanes ):
         print( aeroplane )
 
 def covert_aeroplanes_to_dict(aeroplanes: list) -> list:
+    """Конвертирует объекты в словари"""
     return [ aeroplane.to_dict() for aeroplane in aeroplanes]
 
 def get_aeroplanes_from_countries( countries: list ) -> list:
+    """Получаем список самолетов"""
     aeroplanes_list = []
     for country in countries:
         api_nominatim = AdapterNominatimAPI( country )
@@ -100,6 +99,21 @@ def save_data_to_db():
     db_manager = DBManager( "aeroplanes_db" )
     db_manager.setup_db()
     db_manager.save_data_to_database( aeroplanes_dicts )
+
+    countries_aeroplanes_count = db_manager.get_countries_and_aeroplanes_count()
+    print( countries_aeroplanes_count )
+
+    aeroplanes_list = db_manager.get_all_aeroplanes()
+    print( aeroplanes_list )
+
+    avg = db_manager.get_avg_speed()
+    print( avg )
+
+    aeroplanes_list_speed_above_avg = db_manager.get_aeroplanes_with_higher_speed()
+    print( aeroplanes_list_speed_above_avg )
+
+    aeroplanes_by_callsign = db_manager.get_aeroplanes_with_keyword("VLG")
+    print( aeroplanes_by_callsign )
 
 if __name__ == "__main__":
 
