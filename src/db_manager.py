@@ -251,9 +251,8 @@ class DBManager(BaseDBManager):
         with DBConnector(self.db_name) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    sql.SQL(
-                        """SELECT callsign FROM aeroplanes WHERE callsign LIKE '%{}%';"""
-                    ).format(sql.Identifier(callsign))
+                    """SELECT callsign FROM aeroplanes WHERE callsign LIKE %s;""",
+                    (f"%{callsign}%",)
                 )
                 rows = cursor.fetchall()
         return rows
