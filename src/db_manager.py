@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from psycopg2 import connect, sql
+from psycopg2 import connect
 
 from src.config import config
 
@@ -83,16 +83,8 @@ class DBCreator:
         with self._connector as conn:
             conn.connection.autocommit = True
             with conn.cursor() as cursor:
-                cursor.execute(
-                    sql.SQL("DROP DATABASE IF EXISTS {}").format(
-                        sql.Identifier(self._database_name)
-                    )
-                )
-                cursor.execute(
-                    sql.SQL("CREATE DATABASE {}").format(
-                        sql.Identifier(self._database_name)
-                    )
-                )
+                cursor.execute(f"DROP DATABASE IF EXISTS {self._database_name}")
+                cursor.execute(f"CREATE DATABASE {self._database_name}")
                 print("База данных создана")
 
 
