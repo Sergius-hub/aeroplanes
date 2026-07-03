@@ -1,5 +1,6 @@
 from typing import Self
 
+
 class Aeroplane:
 
     def __init__(self, callsign: str, country: str, velocity: float, altitude: float):
@@ -8,6 +9,28 @@ class Aeroplane:
         self.country = country
         self.velocity = velocity
         self.altitude = altitude
+
+    def __str__(self) -> str:
+        """Вывод строки"""
+        return f"Самолет: {self.callsign} country: {self.country} volocity: {self.velocity} altitude: {self.altitude}"
+
+    def __lt__(self, other: Self) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
+        return self.altitude < other.altitude
+
+    def __gt__(self, other: Self) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
+        return self.altitude > other.altitude
+
+    def __eq__(self, other: object) -> bool:
+        """Сравнение самолетов по высоте"""
+        if not isinstance(other, Aeroplane):
+            return NotImplemented
+        return self.altitude == other.altitude
 
     # Геттеры и сеттеры
     @property
@@ -56,7 +79,9 @@ class Aeroplane:
             print("Неправильный тип данных в 'Altitude', ожидается число")
             value = 0.0
         if not 0 <= value <= 30000:
-            print(f"Неправильное значение 'Altitude' = {value}, у самолета '{self.callsign}' диапазон от 0 до 30000")
+            print(
+                f"Неправильное значение 'Altitude' = {value}, у самолета '{self.callsign}' диапазон от 0 до 30000"
+            )
 
         self._altitude = value
 
@@ -66,30 +91,12 @@ class Aeroplane:
         return [
             cls(
                 callsign=state[1].strip() if state[1] else "n/a",
-                country=state[2],
+                country=state[2].strip() if state[2] else "n/a",
                 velocity=state[9] or 0.0,
                 altitude=state[13] or 0.0,
             )
             for state in raw_data["states"]
         ]
-
-    def __lt__(self, other: Self) -> bool:
-        """Сравнение самолетов по высоте"""
-        if not isinstance(other, Aeroplane):
-            return NotImplemented
-        return self.altitude < other.altitude
-
-    def __gt__(self, other: Self) -> bool:
-        """Сравнение самолетов по высоте"""
-        if not isinstance(other, Aeroplane):
-            return NotImplemented
-        return self.altitude > other.altitude
-
-    def __eq__(self, other: object) -> bool:
-        """Сравнение самолетов по высоте"""
-        if not isinstance(other, Aeroplane):
-            return NotImplemented
-        return self.altitude == other.altitude
 
     def to_dict(self) -> dict:
         """Возвращает словарь"""
@@ -99,11 +106,3 @@ class Aeroplane:
             "velocity": self.velocity,
             "altitude": self.altitude,
         }
-
-    def __str__(self) -> str:
-        """Вывод строки"""
-        return (
-            f"Самолет: {self.callsign} {self.country} {self.velocity} {self.altitude}"
-        )
-
-

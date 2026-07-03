@@ -1,12 +1,17 @@
 from src.api_adapters import AdapterNominatimAPI, AdapterOpenskyAPI
 from src.aeroplane import Aeroplane
 from src.file_adapter import JSONFileAdapter
-import json
+from src.db_manager import DBManager
 
-def filter_aeroplanes( aeroplanes, filter_words ):
+
+def filter_aeroplanes_by_countries( aeroplanes, filter_words ):
     """ Фильтрует список самолетов по странам """
-    print("Фильтрация по странам:")
+    print(f"Фильтрация по странам {filter_words}:")
     return [ aeroplane for aeroplane in aeroplanes if aeroplane.country in filter_words ]
+
+def filter_aeroplanes_by_altitude_and_velocity( aeroplanes, altitude: float=0.0, velocity: float=0.0 ):
+    """ Фильтрует список самолетов по странам """
+    return [ aeroplane for aeroplane in aeroplanes if aeroplane.altitude <= altitude and aeroplane.velocity >= velocity ]
 
 def get_aeroplanes_by_altitude( aeroplanes, altitude_range ):
     """ Фильтрует список самолетов по диапазону высоты """
@@ -29,6 +34,27 @@ def print_aeroplanes( aeroplanes ):
     for aeroplane in aeroplanes:
         print( aeroplane )
 
+def covert_aeroplanes_to_dict(aeroplanes: list) -> list:
+    """Конвертирует объекты в словари"""
+    return [ aeroplane.to_dict() for aeroplane in aeroplanes]
+
+def get_aeroplanes_from_countries( countries: list ) -> list:
+    """Получаем список самолетов"""
+    aeroplanes_list = []
+    for country in countries:
+        api_nominatim = AdapterNominatimAPI( country )
+        bbox = api_nominatim.boundingbox()
+        api_opensky = AdapterOpenskyAPI( bbox )
+        raw_data = api_opensky.response.json()
+
+        aeroplanes = Aeroplane.read_from_raw( raw_data )
+        aeroplanes = filter_aeroplanes_by_countries( aeroplanes, country )
+        aeroplanes = filter_aeroplanes_by_altitude_and_velocity( aeroplanes, 30000.0, 10.0)
+        aeroplanes_list.extend(aeroplanes)
+        print_aeroplanes(aeroplanes)
+
+    return aeroplanes_list
+
 def user_interface():
     country = input( "Введите название страны: " )
     # top_n = int( input( "Введите количество самолетов для вывода в топ N: " ) )
@@ -42,7 +68,7 @@ def user_interface():
     raw_data = api_opensky.response.json()
 
     aeroplanes = Aeroplane.read_from_raw(raw_data)
-    aeroplanes = filter_aeroplanes( aeroplanes, country )
+    aeroplanes = filter_aeroplanes_by_countries( aeroplanes, country )
     print_aeroplanes(aeroplanes)
 
     # sorted_aeroplanes = sort_aeroplanes(aeroplanes)
@@ -63,7 +89,32 @@ def user_interface():
     # print(data)
     # print(type(data))
 
+def save_data_to_db():
+    aeroplanes = get_aeroplanes_from_countries(["Spain", "Italy", "Japan", "France"])
+    aeroplanes_dicts = covert_aeroplanes_to_dict(aeroplanes)
+
+    for aeroplane in aeroplanes_dicts:
+        print( aeroplane )
+
+    db_manager = DBManager( "aeroplanes_db" )
+    db_manager.setup_db()
+    db_manager.save_data_to_database( aeroplanes_dicts )
+
+    countries_aeroplanes_count = db_manager.get_countries_and_aeroplanes_count()
+    print( countries_aeroplanes_count )
+
+    aeroplanes_list = db_manager.get_all_aeroplanes()
+    print( aeroplanes_list )
+
+    avg = db_manager.get_avg_speed()
+    print( avg )
+
+    aeroplanes_list_speed_above_avg = db_manager.get_aeroplanes_with_higher_speed()
+    print( aeroplanes_list_speed_above_avg )
+
+    aeroplanes_by_callsign = db_manager.get_aeroplanes_with_keyword("VLG")
+    print( aeroplanes_by_callsign )
+
 if __name__ == "__main__":
 
-    user_interface()
-
+    save_data_to_db()

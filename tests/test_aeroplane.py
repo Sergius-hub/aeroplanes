@@ -86,7 +86,7 @@ class TestAeroplaneProperties:
         plane = Aeroplane("ABC123", "USA", 850.5, 10000)
         plane.altitude = -500.0
         captured = capsys.readouterr()
-        assert "Altitude должна быть в диапазоне от 0 до 30000" in captured.out
+        assert "Неправильное значение 'Altitude' = -500.0, у самолета 'ABC123' диапазон от 0 до 30000" in captured.out
         # Сеттер не сбрасывает значение, только печатает предупреждение
         assert plane.altitude == -500.0
 
@@ -95,14 +95,14 @@ class TestAeroplaneProperties:
         plane = Aeroplane("ABC123", "USA", 850.5, 10000)
         plane.altitude = 35000.0
         captured = capsys.readouterr()
-        assert "Altitude должна быть в диапазоне от 0 до 30000" in captured.out
+        assert "Неправильное значение 'Altitude' = 35000.0, у самолета 'ABC123' диапазон от 0 до 30000" in captured.out
 
     def test_altitude_setter_not_number(self, capsys):
         """Тест: высота не число -> печатает предупреждение, устанавливает 0.0"""
         plane = Aeroplane("ABC123", "USA", 850.5, 10000)
         plane.altitude = "abc"  # type: ignore
         captured = capsys.readouterr()
-        assert "Altitude должно быть числом" in captured.out
+        assert "Неправильный тип данных в 'Altitude', ожидается число" in captured.out
         assert plane.altitude == 0.0
 
 

@@ -150,6 +150,44 @@ class JSONFileAdapter(BaseFileAdapter):
         pass
 ```
 
+DBManager:
+```Python
+class DBManager(BaseDBManager):
+    """Класс, который может соединяться с базой данных, записывать в базу и получать информацию"""
+
+    def __init__(self, db_name: str = "aeroplanes_db"):
+        super().__init__(db_name)
+
+    def save_data_to_database(self, data: list[dict[str, Any]]):
+        """Метод сохраняет информацию из словаря в базу данных"""
+        ...
+
+    def clear_tables(self):
+        """Очистка таблиц"""
+        ...
+
+    def get_countries_and_aeroplanes_count(self) -> list[tuple[str, int]]:
+        """Получает список всех стран и количество самолетов в их воздушных пространствах"""
+        ...
+
+    def get_all_aeroplanes(self) -> list[tuple[str, Any]]:
+        """Получает список всех воздушных судов"""
+        ...
+
+    def get_avg_speed(self):
+        """Получает среднюю скорость по самолетам"""
+        ...
+
+    def get_aeroplanes_with_higher_speed(self) -> list[tuple[str, float]]:
+        """Получает список всех самолетов, у которых скорость выше средней"""
+        ...
+
+    def get_aeroplanes_with_keyword(self, callsign: str) -> list[tuple[str, Any]]:
+        """Получает список всех самолетов, в позывном которых содержатся переданные в метод символы"""
+        ...
+```
+
+
 ## Тестирование
 Тесты конструктора и свойств
 ```commandline
